@@ -1,0 +1,104 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "babel>2.8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "invenio-globus-kcworks"
+version = "0.1.0"
+description = "Globus OAuth integration for InvenioRDM"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "MESH Research", email = "scottia4@msu.edu"}
+]
+keywords = ["invenio", "rdm", "globus", "oauth", "transfer"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "flask>=2.0.0",
+    "invenio-oauthclient>=1.5.0",
+    "invenio-rdm-records>=10.0.0",
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+tests = [
+    "pytest>=6.0.0",
+    "pytest-invenio>=1.0.0",
+    "pytest-mock>=3.0.0",
+    "responses>=0.10.0",
+]
+
+docs = [
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/MESH-Research/invenio-globus-kcworks"
+Documentation = "https://invenio-globus-kcworks.readthedocs.io/"
+Repository = "https://github.com/MESH-Research/invenio-globus-kcworks"
+Issues = "https://github.com/MESH-Research/invenio-globus-kcworks/issues"
+
+[project.entry-points."invenio_base.apps"]
+invenio_globus_kcworks = "invenio_globus_kcworks.ext:InvenioGlobusKCWorks"
+
+[project.entry-points."invenio_base.api_apps"]
+invenio_globus_kcworks = "invenio_globus_kcworks.ext:InvenioGlobusKCWorks"
+
+[project.entry-points."invenio_base.blueprints"]
+invenio_globus_kcworks = "invenio_globus_kcworks.views:create_blueprint"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["invenio_globus_kcworks*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.po", "*.pot", "*.mo"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "D", "DOC"]
+ignore = [
+    "E501",  # Line too long
+    "I001",  # Import sorting
+    "E1",    # Indentation
+    "W1",    # Indentation warnings
+    "W2",    # Whitespace warnings
+    "W3",    # Blank line warnings
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+warn_no_return = false
+ignore_missing_imports = true
+follow_imports = "skip"
+allow_untyped_globals = true

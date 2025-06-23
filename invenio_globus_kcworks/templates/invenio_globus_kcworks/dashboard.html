@@ -1,0 +1,183 @@
+{%- extends "invenio_theme/page.html" %}
+
+{%- block page_body %}
+<div class="ui container">
+  <div class="ui segment">
+    <h2 class="ui header">
+      <i class="cloud icon"></i>
+      <div class="content">
+        Globus Transfer Dashboard
+        <div class="sub header">Manage your Globus collections and transfers</div>
+      </div>
+    </h2>
+
+    {% if not has_globus_account %}
+    <div class="ui warning message">
+      <div class="header">Globus Account Not Connected</div>
+      <p>You need to connect your Globus account to access collections and transfer files.</p>
+      <a href="{{ url_for('invenio_oauthclient.login', remote_app='globus_transfer') }}"
+         class="ui primary button">
+        <i class="cloud icon"></i>
+        Connect Globus Account
+      </a>
+    </div>
+    {% else %}
+    <div class="ui success message">
+      <div class="header">Globus Account Connected</div>
+      <p>Your Globus account is connected and ready to use.</p>
+      <a href="{{ url_for('invenio_oauthclient.disconnect', remote_app='globus_transfer') }}"
+         class="ui red button">
+        <i class="unlink icon"></i>
+        Disconnect Account
+      </a>
+    </div>
+
+    <div class="ui segment">
+      <h3 class="ui header">
+        <i class="folder icon"></i>
+        <div class="content">
+          Your Collections
+          <div class="sub header">Collections you have access to</div>
+        </div>
+      </h3>
+
+      {% if collections %}
+      <div class="ui divided list">
+        {% for collection in collections %}
+        <div class="item">
+          <div class="content">
+            <div class="header">
+              <i class="database icon"></i>
+              {{ collection.get('display_name', collection.get('name', 'Unnamed Collection')) }}
+            </div>
+            <div class="description">
+              <strong>ID:</strong> {{ collection.get('id', 'N/A') }}<br>
+              <strong>Type:</strong> {{ collection.get('DATA_TYPE', 'N/A') }}<br>
+              <strong>Owner:</strong> {{ collection.get('owner_string', 'N/A') }}
+            </div>
+            <div class="extra">
+              <button class="ui small button view-collection"
+                      data-collection-id="{{ collection.get('id') }}">
+                <i class="eye icon"></i>
+                View Details
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="ui info message">
+        <div class="header">No Collections Found</div>
+        <p>You don't have access to any collections yet, or there was an error loading them.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="ui segment">
+      <h3 class="ui header">
+        <i class="exchange icon"></i>
+        <div class="content">
+          Transfer Files
+          <div class="sub header">Transfer files between collections</div>
+        </div>
+      </h3>
+
+      <form class="ui form" id="transfer-form">
+        <div class="two fields">
+          <div class="field">
+            <label>Source Collection</label>
+            <select class="ui dropdown" name="source_endpoint" required>
+              <option value="">Select source collection...</option>
+              {% for collection in collections %}
+              <option value="{{ collection.get('id') }}">
+                {{ collection.get('display_name', collection.get('name', 'Unnamed Collection')) }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label>Destination Collection</label>
+            <select class="ui dropdown" name="dest_endpoint" required>
+              <option value="">Select destination collection...</option>
+              {% for collection in collections %}
+              <option value="{{ collection.get('id') }}">
+                {{ collection.get('display_name', collection.get('name', 'Unnamed Collection')) }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="two fields">
+          <div class="field">
+            <label>Source Path</label>
+            <input type="text" name="source_path" placeholder="/path/to/source/file" required>
+          </div>
+          <div class="field">
+            <label>Destination Path</label>
+            <input type="text" name="dest_path" placeholder="/path/to/destination/file" required>
+          </div>
+        </div>
+        <button class="ui primary button" type="submit">
+          <i class="play icon"></i>
+          Start Transfer
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  // Initialize dropdowns
+  $('.ui.dropdown').dropdown();
+
+  // Handle collection detail view
+  $('.view-collection').click(function() {
+    var collectionId = $(this).data('collection-id');
+    $.get('/globus/collections/' + collectionId)
+      .done(function(data) {
+        if (data.success) {
+          // Show collection details in a modal or expand the item
+          console.log('Collection details:', data.collection);
+        } else {
+          alert('Error loading collection details: ' + data.error);
+        }
+      })
+      .fail(function() {
+        alert('Failed to load collection details');
+      });
+  });
+
+  // Handle transfer form submission
+  $('#transfer-form').submit(function(e) {
+    e.preventDefault();
+
+    var formData = {
+      source_endpoint: $('select[name="source_endpoint"]').val(),
+      dest_endpoint: $('select[name="dest_endpoint"]').val(),
+      source_path: $('input[name="source_path"]').val(),
+      dest_path: $('input[name="dest_path"]').val()
+    };
+
+    $.ajax({
+      url: '/globus/transfer',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(formData),
+      success: function(data) {
+        if (data.success) {
+          alert('Transfer initiated successfully! Transfer ID: ' + data.transfer_id);
+        } else {
+          alert('Error initiating transfer: ' + data.error);
+        }
+      },
+      error: function() {
+        alert('Failed to initiate transfer');
+      }
+    });
+  });
+});
+</script>
+{%- endblock %}

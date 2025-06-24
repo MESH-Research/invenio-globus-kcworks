@@ -29,6 +29,7 @@ classifiers = [
 ]
 dependencies = [
     "flask>=2.0.0",
+    "invenio-app-rdm>=12.0.0,<13.0.0",
     "invenio-oauthclient>=1.5.0",
     "invenio-rdm-records>=10.0.0",
     "requests>=2.25.0",
